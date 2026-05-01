@@ -355,9 +355,18 @@ const DashboardBody = () => (
 
 // ─── Settings body ────────────────────────────────────────────────────────────
 
-const SettingsBody = ({ transparent, setTransparent }: { transparent: boolean; setTransparent: (v: boolean) => void }) => {
+type GlassSettings = { outer: number; sidebar: number; content: number; toolbar: number }
+const DEFAULT_GLASS: GlassSettings = { outer: 70, sidebar: 0, content: 0, toolbar: 70 }
+
+const SettingsBody = ({ glass, setGlass }: { glass: GlassSettings; setGlass: (v: GlassSettings) => void }) => {
   const { theme, setTheme } = useSettingStore()
   const handleTheme = (t: 'light' | 'dark') => { applyThemeColors(t); setTheme(t) }
+  const glassSliders: { key: keyof GlassSettings; label: string; sub: string }[] = [
+    { key: 'outer',   label: 'Latar Utama',   sub: 'Lapisan glass keseluruhan UI'   },
+    { key: 'sidebar', label: 'Sidebar',        sub: 'Panel navigasi kiri'            },
+    { key: 'content', label: 'Area Konten',    sub: 'Latar di belakang card'         },
+    { key: 'toolbar', label: 'Toolbar',        sub: 'Bar atas dengan pencarian'      },
+  ]
 
   const notifItems = [
     { label: "Pengingat Tugas",    sub: "Notifikasi sebelum deadline",       on: true  },
@@ -476,24 +485,36 @@ const SettingsBody = ({ transparent, setTransparent }: { transparent: boolean; s
                 <span className={cn("text-[11px] font-semibold", theme === 'dark' ? "text-os-accent" : "text-os-foreground/60")}>Gelap</span>
               </button>
             </div>
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-os-foreground/[0.06]">
-              <div className="flex items-center gap-2">
-                <SettingsItemIcon icon={IconDroplet} size={12} className="bg-os-foreground/10 text-os-foreground/60" />
-                <div>
-                  <p className="text-xs font-medium text-os-foreground">Efek Transparansi</p>
-                  <p className="text-[10px] text-os-foreground/40 mt-0.5">Wallpaper terlihat di balik UI</p>
+            <div className="mt-3 pt-3 border-t border-os-foreground/[0.06] space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <SettingsItemIcon icon={IconDroplet} size={12} className="bg-os-foreground/10 text-os-foreground/60" />
+                  <p className="text-xs font-semibold text-os-foreground">Transparansi</p>
                 </div>
+                <button
+                  onClick={() => setGlass(DEFAULT_GLASS)}
+                  className="text-[10px] font-semibold text-os-accent px-2 py-1 rounded-lg hover:bg-os-accent/10 transition-colors"
+                >
+                  Reset Default
+                </button>
               </div>
-              <button
-                onClick={() => setTransparent(!transparent)}
-                className={cn("w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0",
-                  transparent ? "bg-os-accent" : "bg-os-foreground/20"
-                )}
-              >
-                <span className={cn("absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-all duration-200",
-                  transparent ? "left-[calc(100%-18px)]" : "left-0.5"
-                )} />
-              </button>
+              {glassSliders.map(({ key, label, sub }) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <p className="text-xs font-medium text-os-foreground">{label}</p>
+                      <p className="text-[9px] text-os-foreground/40">{sub}</p>
+                    </div>
+                    <span className="text-xs font-bold text-os-accent tabular-nums w-8 text-right">{glass[key]}%</span>
+                  </div>
+                  <input
+                    type="range" min="0" max="100" value={glass[key]}
+                    onChange={e => setGlass({ ...glass, [key]: Number(e.target.value) })}
+                    className="w-full h-1.5 rounded-full appearance-none cursor-pointer bg-os-foreground/10"
+                    style={{ accentColor: 'hsl(var(--os-accent))' }}
+                  />
+                </div>
+              ))}
             </div>
           </motion.div>
 
@@ -586,7 +607,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768)
   const [searchQuery, setSearchQuery] = useState("")
   const [headerScrolled, setHeaderScrolled] = useState(false)
-  const [transparent, setTransparent] = useState(true)
+  const [glass, setGlass] = useState<GlassSettings>(DEFAULT_GLASS)
 
   useEffect(() => {
     const onResize = () => {
@@ -602,7 +623,10 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   // ── macOS Window mode ─────────────────────────────────────────────────────
   if (isWindow) {
     return (
-      <div className={cn("flex h-full font-semibold relative transition-colors duration-300", transparent ? "bg-os-surface/70 backdrop-blur-2xl" : "bg-os-surface")}>
+      <div
+        className={cn("flex h-full font-semibold relative transition-all duration-300", glass.outer > 0 && "backdrop-blur-2xl")}
+        style={{ backgroundColor: `hsl(var(--os-surface) / ${glass.outer / 100})` }}
+      >
 
         {/* Backdrop — hanya di mobile saat sidebar terbuka */}
         <AnimatePresence>
@@ -632,8 +656,9 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
                 "shrink-0 flex flex-col h-full overflow-hidden",
                 isMobile
                   ? "absolute left-0 top-0 w-[215px] z-50 bg-os-surface border-r border-os-foreground/10"
-                  : cn("border-r border-os-foreground/10", !transparent && "bg-os-surface")
+                  : "border-r border-os-foreground/10"
               )}
+              style={isMobile ? undefined : { backgroundColor: `hsl(var(--os-surface) / ${glass.sidebar / 100})` }}
             >
               <div className="flex px-4 h-14 min-h-14 items-center gap-2.5 wfd min-w-[215px]">
                 <SettingsItemIcon icon={IconSchool} size={13} className="bg-os-accent text-white" />
@@ -649,17 +674,15 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
         </AnimatePresence>
 
         {/* Main content — selalu full width, tidak tergeser sidebar */}
-        <div className={cn(
-          "flex flex-col min-h-full shadow-os-window-frame-content w-full overflow-hidden transition-colors duration-300",
-          !isMobile && sidebarOpen ? "border-l border-l-os-foreground/10 dark:border-l-black" : "",
-          transparent ? "bg-transparent" : "bg-os-surface"
-        )}>
-
-          {/* Toolbar — h-14 min-h-14 + bg-os-surface-accessible + wfd, identik Notes */}
-          <div className={cn(
-            cn("h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 wfd", transparent ? "bg-os-surface-accessible/70 backdrop-blur-sm" : "bg-os-surface-accessible dark:bg-os-surface"),
-            { "border-b border-b-os-foreground/5": headerScrolled }
-          )}>
+        <div
+          className={cn("flex flex-col min-h-full shadow-os-window-frame-content w-full overflow-hidden transition-all duration-300", !isMobile && sidebarOpen ? "border-l border-l-os-foreground/10 dark:border-l-black" : "")}
+          style={{ backgroundColor: `hsl(var(--os-surface) / ${glass.content / 100})` }}
+        >
+          {/* Toolbar */}
+          <div
+            className={cn("h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 wfd transition-all duration-300", glass.toolbar > 0 && "backdrop-blur-sm", headerScrolled && "border-b border-b-os-foreground/5")}
+            style={{ backgroundColor: `hsl(var(--os-surface-accessible) / ${glass.toolbar / 100})` }}
+          >
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="opacity-60 hover:opacity-100 transition-opacity shrink-0"
@@ -694,7 +717,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
 
           {/* Scroll content — identik Settings PerfectScrollbar */}
           <PerfectScrollbar onScrollY={e => setHeaderScrolled(e.scrollTop >= 10)}>
-            {activeNav === 'settings' ? <SettingsBody transparent={transparent} setTransparent={setTransparent} /> : <DashboardBody />}
+            {activeNav === 'settings' ? <SettingsBody glass={glass} setGlass={setGlass} /> : <DashboardBody />}
           </PerfectScrollbar>
 
         </div>
