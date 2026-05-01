@@ -548,7 +548,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
                 "shrink-0 flex flex-col h-full overflow-hidden",
                 isMobile
                   ? "absolute left-0 top-0 w-[215px] z-50 bg-os-surface border-r border-os-foreground/10"
-                  : ""
+                  : "bg-os-surface border-r border-os-foreground/10"
               )}
             >
               <div className="flex p-5 h-14 min-h-14 items-center gap-2.5 wfd min-w-[215px]">
