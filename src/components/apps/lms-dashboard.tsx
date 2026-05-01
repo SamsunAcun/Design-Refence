@@ -6,7 +6,7 @@ import {
   IconHome2, IconSearch, IconTrophy, IconSchool,
   IconBell, IconChevronRight, IconPlayerPlay,
   IconUsers, IconCalendar, IconFlame, IconStar,
-  IconBookmark, IconSettings, IconLogout, IconMenu2, IconX,
+  IconBookmark, IconSettings, IconLogout,
   IconLayoutSidebar, IconSun, IconMoon, IconDroplet,
 } from "@tabler/icons-react"
 import PerfectScrollbar from "react-perfect-scrollbar"
@@ -498,21 +498,10 @@ const DashboardBody = () => (
 
 const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   const [activeNav, setActiveNav]     = useState("home")
-  const [isMobile, setIsMobile]       = useState(() => window.innerWidth < 768)
-  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [headerScrolled, setHeaderScrolled] = useState(false)
   const [transparent, setTransparent] = useState(false)
-
-  useEffect(() => {
-    const onResize = () => {
-      const mobile = window.innerWidth < 768
-      setIsMobile(mobile)
-      if (!mobile && !sidebarOpen) setSidebarOpen(true)
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [sidebarOpen])
 
   // ── macOS Window mode — struktur identik dengan Notes / Settings ──────────
   if (isWindow) {
@@ -611,103 +600,6 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
     )
   }
 
-  // ── Web Dashboard mode ────────────────────────────────────────────────────
-  return (
-    <div className="h-dvh w-full flex overflow-hidden">
-
-      {/* Backdrop untuk mobile overlay */}
-      <AnimatePresence>
-        {sidebarOpen && isMobile && (
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Sidebar — inline di desktop, overlay di mobile */}
-      <AnimatePresence initial={false}>
-        {sidebarOpen && (
-          <motion.aside
-            key="sidebar"
-            initial={isMobile ? { x: -220 } : { width: 0, opacity: 0 }}
-            animate={isMobile ? { x: 0 } : { width: 220, opacity: 1 }}
-            exit={isMobile ? { x: -220 } : { width: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className={cn(
-              "flex flex-col shrink-0 overflow-hidden bg-os-surface/95 backdrop-blur-2xl border-r border-os-foreground/[0.12]",
-              isMobile
-                ? "fixed inset-y-0 left-0 w-[220px] h-full z-50"
-                : "h-full"
-            )}
-          >
-            <div className="flex items-center gap-2.5 px-5 h-16 shrink-0">
-              <SettingsItemIcon icon={IconSchool} size={14} className="bg-os-accent text-white" />
-              <span className="text-sm font-bold text-os-foreground whitespace-nowrap flex-1">LearnSpace</span>
-              {isMobile && (
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="text-os-foreground/40 hover:text-os-foreground/70 transition-colors"
-                >
-                  <IconX size={16} />
-                </button>
-              )}
-            </div>
-            <SidebarNav
-              activeNav={activeNav}
-              setActiveNav={setActiveNav}
-              onNavSelect={isMobile ? () => setSidebarOpen(false) : undefined}
-            />
-          </motion.aside>
-        )}
-      </AnimatePresence>
-
-      {/* Main area web */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <header className="h-16 shrink-0 flex items-center gap-2 sm:gap-3 px-3 sm:px-5 bg-os-surface-accessible backdrop-blur-2xl border-b border-os-foreground/[0.12]">
-          <Button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="size-8 rounded-lg flex items-center justify-center text-os-foreground/60 shrink-0"
-          >
-            {!isMobile && sidebarOpen ? <IconX size={16} /> : <IconMenu2 size={16} />}
-          </Button>
-          <div className="flex items-center gap-2 bg-os-foreground/[0.10] border border-os-foreground/[0.14] rounded-xl px-3 py-2 flex-1 min-w-0 max-w-xs sm:max-w-sm">
-            <IconSearch size={13} className="text-os-foreground/40 shrink-0" />
-            <input
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              onKeyDown={e => e.stopPropagation()}
-              placeholder="Cari kursus..."
-              className="bg-transparent text-xs text-os-foreground placeholder:text-os-foreground/30 outline-none w-full caret-os-accent min-w-0"
-            />
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
-            <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-orange-light/10 border border-orange-light/20">
-              <IconFlame size={13} className="text-orange-light" />
-              <span className="text-xs font-bold text-orange-light">7</span>
-              <span className="text-xs text-os-foreground/50 hidden sm:block">hari</span>
-            </div>
-            <Button className="size-8 rounded-lg flex items-center justify-center text-os-foreground/60 relative">
-              <IconBell size={16} />
-              <span className="absolute top-1.5 right-1.5 size-1.5 bg-red-light rounded-full" />
-            </Button>
-            <div className="size-8 rounded-full bg-gradient-to-br from-os-accent to-purple-light flex items-center justify-center shrink-0 cursor-pointer">
-              <span className="text-[10px] font-bold text-white">SA</span>
-            </div>
-          </div>
-        </header>
-
-        <PerfectScrollbar className="flex-1">
-          <DashboardBody />
-        </PerfectScrollbar>
-      </div>
-    </div>
-  )
 }
 
 const LMSDashboardWindow = () => {
