@@ -356,7 +356,7 @@ const DashboardBody = () => (
 // ─── Settings body ────────────────────────────────────────────────────────────
 
 type GlassSettings = { outer: number; sidebar: number; content: number; toolbar: number }
-const DEFAULT_GLASS: GlassSettings = { outer: 70, sidebar: 0, content: 0, toolbar: 70 }
+const DEFAULT_GLASS: GlassSettings = { outer: 60, sidebar: 25, content: 0, toolbar: 45 }
 
 const SettingsBody = ({ glass, setGlass }: { glass: GlassSettings; setGlass: (v: GlassSettings) => void }) => {
   const { theme, setTheme } = useSettingStore()
