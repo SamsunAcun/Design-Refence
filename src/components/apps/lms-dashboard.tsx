@@ -311,7 +311,7 @@ const DashboardBody = () => (
           <p className="text-white/70 text-sm mb-1">Selamat datang kembali 👋</p>
           <h1 className="text-xl sm:text-2xl font-bold text-white">Semangat belajar, Samsun!</h1>
           <p className="text-white/60 text-sm mt-1.5">Kamu punya 2 tugas yang segera jatuh tempo. Jaga terus streak-mu!</p>
-          <div className="flex items-center gap-3 mt-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
             <Button className="flex items-center gap-2 bg-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl">
               <IconPlayerPlay size={14} /> Lanjut Belajar
             </Button>
@@ -338,7 +338,7 @@ const DashboardBody = () => (
         >
           <div className="flex items-center justify-between">
             <SettingsItemIcon icon={stat.icon} size={13} className="bg-os-accent/15 text-os-accent" />
-            <span className="text-[10px] text-os-foreground/40 font-medium">{stat.sub}</span>
+            <span className="text-[10px] text-os-foreground/40 font-medium truncate">{stat.sub}</span>
           </div>
           <p className="text-xl sm:text-2xl font-bold text-os-foreground">{stat.value}</p>
           <p className="text-xs text-os-foreground/50">{stat.label}</p>
@@ -347,7 +347,7 @@ const DashboardBody = () => (
     </div>
 
     {/* Main grid */}
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
+    <div className="grid grid-cols-1 min-[860px]:grid-cols-[1fr_280px] gap-5">
 
       {/* Courses */}
       <div className="space-y-4">
@@ -498,10 +498,22 @@ const DashboardBody = () => (
 
 const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   const [activeNav, setActiveNav]     = useState("home")
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile]       = useState(() => window.innerWidth < 768)
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768)
   const [searchQuery, setSearchQuery] = useState("")
   const [headerScrolled, setHeaderScrolled] = useState(false)
   const [transparent, setTransparent] = useState(false)
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (mobile) setSidebarOpen(false)
+      else setSidebarOpen(true)
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // ── macOS Window mode — struktur identik dengan Notes / Settings ──────────
   if (isWindow) {
@@ -538,6 +550,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
                 isWindow
                 transparent={transparent}
                 onToggleTransparent={() => setTransparent(v => !v)}
+                onNavSelect={isMobile ? () => setSidebarOpen(false) : undefined}
               />
             </motion.div>
           )}
@@ -551,13 +564,11 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
 
           {/* Toolbar — h-14 min-h-14 + bg-os-surface-accessible + wfd, identik Notes */}
           <div className={cn(
-            "h-14 min-h-14 flex items-center px-4 gap-2.5 bg-os-surface-accessible dark:bg-os-surface wfd",
+            "h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 bg-os-surface-accessible dark:bg-os-surface wfd",
             { "border-b border-b-os-foreground/5": headerScrolled }
           )}>
-            {/* WindowFrameControl muncul di sini saat sidebar tertutup */}
             {!sidebarOpen && <WindowFrameControl />}
 
-            {/* Toggle sidebar */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="opacity-60 hover:opacity-100 transition-opacity shrink-0"
@@ -565,18 +576,18 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
               <IconLayoutSidebar size={18} />
             </button>
 
-            <div className="flex items-center gap-2 bg-os-foreground/[0.06] border border-os-foreground/[0.08] rounded-lg px-2.5 py-1.5 flex-1 max-w-xs">
+            <div className="flex items-center gap-2 bg-os-foreground/[0.06] border border-os-foreground/[0.08] rounded-lg px-2.5 py-1.5 flex-1 min-w-0 max-w-xs sm:max-w-sm">
               <IconSearch size={13} className="text-os-foreground/40 shrink-0" />
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onKeyDown={e => e.stopPropagation()}
-                placeholder="Cari kursus atau pelajaran..."
-                className="bg-transparent text-xs text-os-foreground placeholder:text-os-foreground/30 outline-none w-full caret-os-accent"
+                placeholder="Cari kursus..."
+                className="bg-transparent text-xs text-os-foreground placeholder:text-os-foreground/30 outline-none w-full min-w-0 caret-os-accent"
               />
             </div>
-            <div className="flex items-center gap-2 ml-auto">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-light/10 border border-orange-light/20">
+            <div className="flex items-center gap-1.5 ml-auto shrink-0">
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-light/10 border border-orange-light/20">
                 <IconFlame size={12} className="text-orange-light" />
                 <span className="text-xs font-bold text-orange-light">7</span>
               </div>
