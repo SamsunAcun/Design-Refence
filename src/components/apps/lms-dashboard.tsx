@@ -661,7 +661,10 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
                   ? "absolute left-0 top-0 w-[215px] z-50 bg-os-surface border-r border-os-foreground/10"
                   : "border-r border-os-foreground/10"
               )}
-              style={isMobile ? undefined : { backgroundColor: `hsl(var(--os-surface) / ${glass.sidebar / 100})` }}
+              style={isMobile ? undefined : {
+                backgroundColor: `hsl(var(--os-surface) / ${glass.sidebar / 100})`,
+                backdropFilter: `blur(${glass.sidebar * 0.4}px)`,
+              }}
             >
               <div className="flex px-4 h-14 min-h-14 items-center gap-2.5 wfd min-w-[215px]">
                 <SettingsItemIcon icon={IconSchool} size={13} className="bg-os-accent text-white" />
@@ -679,7 +682,10 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
         {/* Main content — selalu full width, tidak tergeser sidebar */}
         <div
           className={cn("flex flex-col min-h-full shadow-os-window-frame-content w-full overflow-hidden transition-all duration-300", !isMobile && sidebarOpen ? "border-l border-l-os-foreground/10 dark:border-l-black" : "")}
-          style={{ backgroundColor: `hsl(var(--os-surface) / ${glass.content / 100})` }}
+          style={{
+            backgroundColor: `hsl(var(--os-surface) / ${glass.content / 100})`,
+            backdropFilter: `blur(${glass.content * 0.4}px)`,
+          }}
         >
           {/* Toolbar */}
           <div
