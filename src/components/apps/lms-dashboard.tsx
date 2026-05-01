@@ -347,7 +347,7 @@ const DashboardBody = () => (
     </div>
 
     {/* Main grid */}
-    <div className="grid grid-cols-1 min-[860px]:grid-cols-[1fr_280px] gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5">
 
       {/* Courses */}
       <div className="space-y-4">
