@@ -624,8 +624,11 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   if (isWindow) {
     return (
       <div
-        className={cn("flex h-full font-semibold relative transition-all duration-300", glass.outer > 0 && "backdrop-blur-2xl")}
-        style={{ backgroundColor: `hsl(var(--os-surface) / ${glass.outer / 100})` }}
+        className="flex h-full font-semibold relative transition-all duration-300"
+        style={{
+          backgroundColor: `hsl(var(--os-surface) / ${glass.outer / 100})`,
+          backdropFilter: `blur(${glass.outer * 0.4}px)`,
+        }}
       >
 
         {/* Backdrop — hanya di mobile saat sidebar terbuka */}
@@ -680,8 +683,11 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
         >
           {/* Toolbar */}
           <div
-            className={cn("h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 wfd transition-all duration-300", glass.toolbar > 0 && "backdrop-blur-sm", headerScrolled && "border-b border-b-os-foreground/5")}
-            style={{ backgroundColor: `hsl(var(--os-surface-accessible) / ${glass.toolbar / 100})` }}
+            className={cn("h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 wfd transition-all duration-300", headerScrolled && "border-b border-b-os-foreground/5")}
+            style={{
+              backgroundColor: `hsl(var(--os-surface-accessible) / ${glass.toolbar / 100})`,
+              backdropFilter: `blur(${glass.toolbar * 0.12}px)`,
+            }}
           >
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
