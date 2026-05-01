@@ -12,7 +12,7 @@ import {
 import PerfectScrollbar from "react-perfect-scrollbar"
 import { Button } from "../apps/settings/components/button"
 import { SettingsItemIcon } from "../apps/settings/components/settings-item-icon"
-import { WindowFrameControl, useWindowFrameContext } from "../system/window-frame"
+import { useWindowFrameContext } from "../system/window-frame"
 import { useSettingStore } from "../../stores/settings"
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -551,15 +551,8 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
                   : "bg-os-surface border-r border-os-foreground/10"
               )}
             >
-              <div className="flex p-5 h-14 min-h-14 items-center gap-2.5 wfd min-w-[215px]">
-                <WindowFrameControl />
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="opacity-60 hover:opacity-100 transition-opacity"
-                >
-                  <IconLayoutSidebar size={18} />
-                </button>
-                <SettingsItemIcon icon={IconSchool} size={13} className="bg-os-accent text-white ml-1" />
+              <div className="flex px-4 h-14 min-h-14 items-center gap-2.5 wfd min-w-[215px]">
+                <SettingsItemIcon icon={IconSchool} size={13} className="bg-os-accent text-white" />
                 <span className="text-xs font-bold text-os-foreground whitespace-nowrap">LearnSpace</span>
               </div>
               <SidebarNav
@@ -586,8 +579,6 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
             "h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 bg-os-surface-accessible dark:bg-os-surface wfd",
             { "border-b border-b-os-foreground/5": headerScrolled }
           )}>
-            {!sidebarOpen && <WindowFrameControl />}
-
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="opacity-60 hover:opacity-100 transition-opacity shrink-0"
