@@ -515,26 +515,44 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // ── macOS Window mode — struktur identik dengan Notes / Settings ──────────
+  // ── macOS Window mode ─────────────────────────────────────────────────────
   if (isWindow) {
     return (
-      <div className="flex h-full font-semibold">
+      <div className="flex h-full font-semibold relative">
 
-        {/* Sidebar — AnimatePresence untuk toggle, TANPA background seperti Notes */}
+        {/* Backdrop — hanya di mobile saat sidebar terbuka */}
+        <AnimatePresence>
+          {sidebarOpen && isMobile && (
+            <motion.div
+              key="win-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm z-40"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Sidebar — inline di desktop, overlay di mobile */}
         <AnimatePresence initial={false}>
           {sidebarOpen && (
             <motion.div
               key="win-sidebar"
-              initial={{ width: 0 }}
-              animate={{ width: 215 }}
-              exit={{ width: 0 }}
+              initial={isMobile ? { x: -215 } : { width: 0 }}
+              animate={isMobile ? { x: 0 } : { width: 215 }}
+              exit={isMobile ? { x: -215 } : { width: 0 }}
               transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden shrink-0 flex flex-col h-full"
+              className={cn(
+                "shrink-0 flex flex-col h-full overflow-hidden",
+                isMobile
+                  ? "absolute left-0 top-0 w-[215px] z-50 bg-os-surface border-r border-os-foreground/10"
+                  : ""
+              )}
             >
-              {/* Header sidebar — p-5 h-14 min-h-14, identik Notes */}
               <div className="flex p-5 h-14 min-h-14 items-center gap-2.5 wfd min-w-[215px]">
                 <WindowFrameControl />
-                {/* IconLayoutSidebar sebagai toggle — pattern Notes */}
                 <button
                   onClick={() => setSidebarOpen(false)}
                   className="opacity-60 hover:opacity-100 transition-opacity"
@@ -556,9 +574,10 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
           )}
         </AnimatePresence>
 
-        {/* Main content */}
+        {/* Main content — selalu full width, tidak tergeser sidebar */}
         <div className={cn(
-          "flex flex-col min-h-full shadow-os-window-frame-content w-full overflow-hidden border-l border-l-os-foreground/10 dark:border-l-black transition-colors duration-300",
+          "flex flex-col min-h-full shadow-os-window-frame-content w-full overflow-hidden transition-colors duration-300",
+          !isMobile && sidebarOpen ? "border-l border-l-os-foreground/10 dark:border-l-black" : "",
           transparent ? "bg-transparent" : "bg-os-surface"
         )}>
 
