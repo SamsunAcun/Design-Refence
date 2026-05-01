@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useCallback, useContext, useMemo, useState } from "react"
+import { createContext, PropsWithChildren, useCallback, useContext, useMemo, useRef, useState } from "react"
 import { Rnd } from "react-rnd"
 import { useSpaceContext } from "./space"
 import { cn } from "../../utils/cn"
@@ -49,6 +49,7 @@ const useWindowFrameContext = () => {
 
 const WindowFrame = (props:WindowFrameProps) => {
   const spaceContext = useSpaceContext()
+  const rndRef = useRef<Rnd>(null)
 
   const height = props.initialHeight || DEFAULT_WINDOW_HEIGHT
   const width = props.initialWidth || DEFAULT_WINDOW_WIDTH
@@ -63,16 +64,23 @@ const WindowFrame = (props:WindowFrameProps) => {
   const [position, setPosition] = useState(props.initialPosition == 'center' ? center : (props.initialPosition || {x:0,y:0}))
   const [size, setSize] = useState({ width, height })
 
+  // Gunakan imperative API (updateSize/updatePosition) agar Rnd
+  // benar-benar merespons perubahan ukuran, bukan hanya prop update
   const setFullscreen = useCallback(()=>{
+    const w = spaceContext.width
+    const h = spaceContext.height
     setPosition({x:0,y:0})
-    setSize({width:spaceContext.width, height:spaceContext.height})
+    setSize({width:w, height:h})
+    rndRef.current?.updatePosition({x:0, y:0})
+    rndRef.current?.updateSize({width:w, height:h})
   },[spaceContext])
 
   const setMinimize = useCallback(()=>{},[])
   const close = useCallback(()=>{ props.onClose() },[])
 
   return (
-    <Rnd 
+    <Rnd
+      ref={rndRef}
       size={size}
       position={position}
       className={cn("bg-os-surface text-os-foreground overflow-hidden",props.squared ? "wf-squared" : "rounded-xl",(props.alwaysTransparent || props.focused) ? windowFrameVariantClassName.focused : windowFrameVariantClassName.DEFAULT)}
@@ -106,6 +114,4 @@ const WindowFrameControl = ({className}:{className?:string}) => {
   )
 }
 
-
-
-export { WindowFrame,WindowFrameControl, useWindowFrameContext }
+export { WindowFrame, WindowFrameControl, useWindowFrameContext }
