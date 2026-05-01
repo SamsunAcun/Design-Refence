@@ -91,13 +91,14 @@ const applyThemeColors = (t: 'light' | 'dark') => {
 
 // Konten sidebar yang sama untuk kedua mode
 const SidebarNav = ({
-  activeNav, setActiveNav, isWindow = false, transparent = false, onToggleTransparent
+  activeNav, setActiveNav, isWindow = false, transparent = false, onToggleTransparent, onNavSelect
 }: {
   activeNav: string
   setActiveNav: (k: string) => void
   isWindow?: boolean
   transparent?: boolean
   onToggleTransparent?: () => void
+  onNavSelect?: () => void
 }) => {
   const { theme, setTheme } = useSettingStore()
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -135,7 +136,7 @@ const SidebarNav = ({
             return (
               <button
                 key={item.key}
-                onClick={() => setActiveNav(item.key)}
+                onClick={() => { setActiveNav(item.key); onNavSelect?.() }}
                 className={cn(
                   "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-150",
                   active
@@ -294,12 +295,12 @@ const SidebarNav = ({
 
 // Konten utama (dashboard body) yang sama untuk kedua mode
 const DashboardBody = () => (
-  <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+  <div className="max-w-6xl mx-auto px-3 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-6">
 
     {/* Welcome banner */}
     <motion.div
       initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-      className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-os-accent/85 via-os-accent/70 to-purple-light/60 border border-white/10"
+      className="relative overflow-hidden rounded-2xl p-4 sm:p-6 bg-gradient-to-br from-os-accent/85 via-os-accent/70 to-purple-light/60 border border-white/10"
     >
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-8 -right-8 size-40 rounded-full bg-white/10 blur-3xl" />
@@ -308,7 +309,7 @@ const DashboardBody = () => (
       <div className="relative flex items-center justify-between gap-6">
         <div>
           <p className="text-white/70 text-sm mb-1">Selamat datang kembali 👋</p>
-          <h1 className="text-2xl font-bold text-white">Semangat belajar, Samsun!</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white">Semangat belajar, Samsun!</h1>
           <p className="text-white/60 text-sm mt-1.5">Kamu punya 2 tugas yang segera jatuh tempo. Jaga terus streak-mu!</p>
           <div className="flex items-center gap-3 mt-4">
             <Button className="flex items-center gap-2 bg-white/25 text-white text-sm font-semibold px-4 py-2 rounded-xl">
@@ -333,13 +334,13 @@ const DashboardBody = () => (
           key={stat.label}
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 + i * 0.06, duration: 0.35 }}
-          className="flex flex-col gap-2 p-4 rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] hover:border-os-foreground/15 transition-all"
+          className="flex flex-col gap-2 p-3 sm:p-4 rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] hover:border-os-foreground/15 transition-all"
         >
           <div className="flex items-center justify-between">
             <SettingsItemIcon icon={stat.icon} size={13} className="bg-os-accent/15 text-os-accent" />
             <span className="text-[10px] text-os-foreground/40 font-medium">{stat.sub}</span>
           </div>
-          <p className="text-2xl font-bold text-os-foreground">{stat.value}</p>
+          <p className="text-xl sm:text-2xl font-bold text-os-foreground">{stat.value}</p>
           <p className="text-xs text-os-foreground/50">{stat.label}</p>
         </motion.div>
       ))}
@@ -496,11 +497,22 @@ const DashboardBody = () => (
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
-  const [activeNav, setActiveNav]   = useState("home")
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [activeNav, setActiveNav]     = useState("home")
+  const [isMobile, setIsMobile]       = useState(() => window.innerWidth < 768)
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768)
   const [searchQuery, setSearchQuery] = useState("")
   const [headerScrolled, setHeaderScrolled] = useState(false)
   const [transparent, setTransparent] = useState(false)
+
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (!mobile && !sidebarOpen) setSidebarOpen(true)
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [sidebarOpen])
 
   // ── macOS Window mode — struktur identik dengan Notes / Settings ──────────
   if (isWindow) {
@@ -603,47 +615,79 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   return (
     <div className="h-dvh w-full flex overflow-hidden">
 
-      {/* Sidebar web — dengan frosted glass + animasi */}
+      {/* Backdrop untuk mobile overlay */}
+      <AnimatePresence>
+        {sidebarOpen && isMobile && (
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar — inline di desktop, overlay di mobile */}
       <AnimatePresence initial={false}>
         {sidebarOpen && (
           <motion.aside
             key="sidebar"
-            initial={{ width: 0, opacity: 0 }}
-            animate={{ width: 220, opacity: 1 }}
-            exit={{ width: 0, opacity: 0 }}
+            initial={isMobile ? { x: -220 } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0 } : { width: 220, opacity: 1 }}
+            exit={isMobile ? { x: -220 } : { width: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="h-full flex flex-col shrink-0 overflow-hidden bg-os-surface/70 backdrop-blur-2xl border-r border-os-foreground/[0.12]"
+            className={cn(
+              "flex flex-col shrink-0 overflow-hidden bg-os-surface/95 backdrop-blur-2xl border-r border-os-foreground/[0.12]",
+              isMobile
+                ? "fixed inset-y-0 left-0 w-[220px] h-full z-50"
+                : "h-full"
+            )}
           >
             <div className="flex items-center gap-2.5 px-5 h-16 shrink-0">
               <SettingsItemIcon icon={IconSchool} size={14} className="bg-os-accent text-white" />
-              <span className="text-sm font-bold text-os-foreground whitespace-nowrap">LearnSpace</span>
+              <span className="text-sm font-bold text-os-foreground whitespace-nowrap flex-1">LearnSpace</span>
+              {isMobile && (
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="text-os-foreground/40 hover:text-os-foreground/70 transition-colors"
+                >
+                  <IconX size={16} />
+                </button>
+              )}
             </div>
-            <SidebarNav activeNav={activeNav} setActiveNav={setActiveNav} />
+            <SidebarNav
+              activeNav={activeNav}
+              setActiveNav={setActiveNav}
+              onNavSelect={isMobile ? () => setSidebarOpen(false) : undefined}
+            />
           </motion.aside>
         )}
       </AnimatePresence>
 
       {/* Main area web */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <header className="h-16 shrink-0 flex items-center gap-3 px-5 bg-os-surface-accessible backdrop-blur-2xl border-b border-os-foreground/[0.12]">
+        <header className="h-16 shrink-0 flex items-center gap-2 sm:gap-3 px-3 sm:px-5 bg-os-surface-accessible backdrop-blur-2xl border-b border-os-foreground/[0.12]">
           <Button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="size-8 rounded-lg flex items-center justify-center text-os-foreground/60 shrink-0"
           >
-            {sidebarOpen ? <IconX size={16} /> : <IconMenu2 size={16} />}
+            {!isMobile && sidebarOpen ? <IconX size={16} /> : <IconMenu2 size={16} />}
           </Button>
-          <div className="flex items-center gap-2 bg-os-foreground/[0.10] border border-os-foreground/[0.14] rounded-xl px-3 py-2 max-w-sm w-full">
+          <div className="flex items-center gap-2 bg-os-foreground/[0.10] border border-os-foreground/[0.14] rounded-xl px-3 py-2 flex-1 min-w-0 max-w-xs sm:max-w-sm">
             <IconSearch size={13} className="text-os-foreground/40 shrink-0" />
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={e => e.stopPropagation()}
-              placeholder="Cari kursus atau pelajaran..."
-              className="bg-transparent text-xs text-os-foreground placeholder:text-os-foreground/30 outline-none w-full caret-os-accent"
+              placeholder="Cari kursus..."
+              className="bg-transparent text-xs text-os-foreground placeholder:text-os-foreground/30 outline-none w-full caret-os-accent min-w-0"
             />
           </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-light/10 border border-orange-light/20">
+          <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-xl bg-orange-light/10 border border-orange-light/20">
               <IconFlame size={13} className="text-orange-light" />
               <span className="text-xs font-bold text-orange-light">7</span>
               <span className="text-xs text-os-foreground/50 hidden sm:block">hari</span>
