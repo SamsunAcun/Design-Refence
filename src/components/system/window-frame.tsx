@@ -114,4 +114,4 @@ const WindowFrameControl = ({className}:{className?:string}) => {
   )
 }
 
-export { WindowFrame, WindowFrameControl, useWindowFrameContext }
+export { WindowFrame, WindowFrameControl, useWindowFrameContext, WindowFrameContext }
