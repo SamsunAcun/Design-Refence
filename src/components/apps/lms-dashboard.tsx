@@ -632,10 +632,8 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
 
 }
 
-const LMSDashboardWindow = () => {
+function LMSDashboardWindow() {
   const { setFullscreen } = useWindowFrameContext()
-  // setFullscreen di-update setiap kali SpaceContext berubah (browser resize)
-  // sehingga window selalu fullscreen secara instan
   useEffect(() => { setFullscreen() }, [setFullscreen])
   return <LMSDashboard isWindow />
 }
