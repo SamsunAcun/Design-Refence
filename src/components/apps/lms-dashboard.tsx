@@ -355,7 +355,7 @@ const DashboardBody = () => (
 
 // ─── Settings body ────────────────────────────────────────────────────────────
 
-const SettingsBody = () => {
+const SettingsBody = ({ transparent, setTransparent }: { transparent: boolean; setTransparent: (v: boolean) => void }) => {
   const { theme, setTheme } = useSettingStore()
   const handleTheme = (t: 'light' | 'dark') => { applyThemeColors(t); setTheme(t) }
 
@@ -476,6 +476,25 @@ const SettingsBody = () => {
                 <span className={cn("text-[11px] font-semibold", theme === 'dark' ? "text-os-accent" : "text-os-foreground/60")}>Gelap</span>
               </button>
             </div>
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-os-foreground/[0.06]">
+              <div className="flex items-center gap-2">
+                <SettingsItemIcon icon={IconDroplet} size={12} className="bg-os-foreground/10 text-os-foreground/60" />
+                <div>
+                  <p className="text-xs font-medium text-os-foreground">Efek Transparansi</p>
+                  <p className="text-[10px] text-os-foreground/40 mt-0.5">Wallpaper terlihat di balik UI</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setTransparent(!transparent)}
+                className={cn("w-9 h-5 rounded-full relative transition-colors duration-200 shrink-0",
+                  transparent ? "bg-os-accent" : "bg-os-foreground/20"
+                )}
+              >
+                <span className={cn("absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-all duration-200",
+                  transparent ? "left-[calc(100%-18px)]" : "left-0.5"
+                )} />
+              </button>
+            </div>
           </motion.div>
 
           {/* Notifikasi */}
@@ -567,6 +586,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768)
   const [searchQuery, setSearchQuery] = useState("")
   const [headerScrolled, setHeaderScrolled] = useState(false)
+  const [transparent, setTransparent] = useState(true)
 
   useEffect(() => {
     const onResize = () => {
@@ -582,7 +602,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   // ── macOS Window mode ─────────────────────────────────────────────────────
   if (isWindow) {
     return (
-      <div className="flex h-full font-semibold relative">
+      <div className={cn("flex h-full font-semibold relative transition-colors duration-300", transparent ? "bg-os-surface/70 backdrop-blur-2xl" : "bg-os-surface")}>
 
         {/* Backdrop — hanya di mobile saat sidebar terbuka */}
         <AnimatePresence>
@@ -612,7 +632,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
                 "shrink-0 flex flex-col h-full overflow-hidden",
                 isMobile
                   ? "absolute left-0 top-0 w-[215px] z-50 bg-os-surface border-r border-os-foreground/10"
-                  : "bg-os-surface border-r border-os-foreground/10"
+                  : cn("border-r border-os-foreground/10", !transparent && "bg-os-surface")
               )}
             >
               <div className="flex px-4 h-14 min-h-14 items-center gap-2.5 wfd min-w-[215px]">
@@ -632,12 +652,12 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
         <div className={cn(
           "flex flex-col min-h-full shadow-os-window-frame-content w-full overflow-hidden transition-colors duration-300",
           !isMobile && sidebarOpen ? "border-l border-l-os-foreground/10 dark:border-l-black" : "",
-          "bg-os-surface"
+          transparent ? "bg-transparent" : "bg-os-surface"
         )}>
 
           {/* Toolbar — h-14 min-h-14 + bg-os-surface-accessible + wfd, identik Notes */}
           <div className={cn(
-            "h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 bg-os-surface-accessible dark:bg-os-surface wfd",
+            cn("h-14 min-h-14 flex items-center px-2 sm:px-4 gap-1.5 sm:gap-2.5 wfd", transparent ? "bg-os-surface-accessible/70 backdrop-blur-sm" : "bg-os-surface-accessible dark:bg-os-surface"),
             { "border-b border-b-os-foreground/5": headerScrolled }
           )}>
             <button
@@ -674,7 +694,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
 
           {/* Scroll content — identik Settings PerfectScrollbar */}
           <PerfectScrollbar onScrollY={e => setHeaderScrolled(e.scrollTop >= 10)}>
-            {activeNav === 'settings' ? <SettingsBody /> : <DashboardBody />}
+            {activeNav === 'settings' ? <SettingsBody transparent={transparent} setTransparent={setTransparent} /> : <DashboardBody />}
           </PerfectScrollbar>
 
         </div>
