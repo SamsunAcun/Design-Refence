@@ -8,6 +8,7 @@ import {
   IconUsers, IconCalendar, IconFlame, IconStar,
   IconBookmark, IconSettings, IconLogout,
   IconLayoutSidebar, IconSun, IconMoon, IconDroplet,
+  IconUser, IconLock, IconWorld, IconBellRinging, IconPencil, IconCamera,
 } from "@tabler/icons-react"
 import PerfectScrollbar from "react-perfect-scrollbar"
 import { Button } from "../apps/settings/components/button"
@@ -46,6 +47,7 @@ const navItems = [
   { key: "calendar",     label: "Kalender",   icon: IconCalendar },
   { key: "community",    label: "Komunitas",  icon: IconUsers    },
   { key: "achievements", label: "Pencapaian", icon: IconTrophy   },
+  { key: "settings",    label: "Pengaturan", icon: IconSettings  },
 ]
 
 const weekData = [60, 85, 45, 100, 70, 30, 0]
@@ -89,209 +91,66 @@ const applyThemeColors = (t: 'light' | 'dark') => {
   }
 }
 
-// Konten sidebar yang sama untuk kedua mode
 const SidebarNav = ({
-  activeNav, setActiveNav, isWindow = false, transparent = false, onToggleTransparent, onNavSelect
+  activeNav, setActiveNav, onNavSelect
 }: {
   activeNav: string
   setActiveNav: (k: string) => void
-  isWindow?: boolean
-  transparent?: boolean
-  onToggleTransparent?: () => void
   onNavSelect?: () => void
-}) => {
-  const { theme, setTheme } = useSettingStore()
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settingsView, setSettingsView] = useState<'menu' | 'tema'>('menu')
-
-  const handleTheme = (t: 'light' | 'dark') => {
-    applyThemeColors(t)
-    setTheme(t)
-  }
-
-  const handleToggleSettings = () => {
-    if (settingsOpen) setSettingsView('menu')
-    setSettingsOpen(v => !v)
-  }
-
-  return (
-    <>
-      <div className="mx-3 mb-3 p-3 rounded-xl bg-os-foreground/[0.06] border border-os-foreground/[0.08] shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="size-8 rounded-full bg-gradient-to-br from-os-accent to-purple-light flex items-center justify-center shrink-0">
-            <span className="text-[11px] font-bold text-white">SA</span>
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-os-foreground truncate">Samsun A.</p>
-            <p className="text-[10px] text-os-foreground/40 truncate">Student · Level 12</p>
-          </div>
+}) => (
+  <>
+    <div className="mx-3 mb-3 p-3 rounded-xl bg-os-foreground/[0.06] border border-os-foreground/[0.08] shrink-0">
+      <div className="flex items-center gap-2.5">
+        <div className="size-8 rounded-full bg-gradient-to-br from-os-accent to-purple-light flex items-center justify-center shrink-0">
+          <span className="text-[11px] font-bold text-white">SA</span>
+        </div>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold text-os-foreground truncate">Samsun A.</p>
+          <p className="text-[10px] text-os-foreground/40 truncate">Student · Level 12</p>
         </div>
       </div>
+    </div>
 
-      <PerfectScrollbar className="flex-1 px-2">
-        <p className="text-[9px] font-bold uppercase tracking-widest text-os-foreground/30 px-3 pb-1.5 pt-1">Menu</p>
-        <div className="space-y-0.5">
-          {navItems.map((item) => {
-            const active = activeNav === item.key
-            return (
-              <button
-                key={item.key}
-                onClick={() => { setActiveNav(item.key); onNavSelect?.() }}
-                className={cn(
-                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-150",
-                  active
-                    ? "bg-os-accent/15 text-os-accent"
-                    : "text-os-foreground/60 hover:text-os-foreground hover:bg-os-foreground/[0.06]"
-                )}
-              >
-                <SettingsItemIcon
-                  icon={item.icon} size={13}
-                  className={cn("shrink-0", active ? "bg-os-accent text-white" : "bg-os-foreground/10 text-os-foreground/60")}
-                />
-                <span className="text-xs font-medium flex-1 whitespace-nowrap">{item.label}</span>
-                {item.badge && (
-                  <span className="text-[9px] font-bold bg-red-light text-white rounded-full min-w-4 h-4 flex items-center justify-center px-1 shrink-0">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </PerfectScrollbar>
-
-      <div className="px-2 pb-2 pt-1.5 border-t border-os-foreground/[0.07] space-y-1 shrink-0">
-
-        {/* Panel Pengaturan */}
-        {isWindow && (
-          <AnimatePresence initial={false}>
-            {settingsOpen && (
-              <motion.div
-                key="settings-panel"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="overflow-hidden"
-              >
-                <div className="mb-1 rounded-xl border border-os-foreground/[0.08] bg-os-foreground/[0.03] overflow-hidden">
-
-                  <AnimatePresence mode="wait" initial={false}>
-                    {settingsView === 'menu' ? (
-                      <motion.div
-                        key="menu"
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -8 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <div className="px-3 py-2 border-b border-os-foreground/[0.06]">
-                          <span className="text-[9px] font-bold uppercase tracking-widest text-os-foreground/30">Pengaturan</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setSettingsView('tema')}
-                          className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-os-foreground/[0.05] transition-colors"
-                        >
-                          <div className="flex items-center gap-2">
-                            <SettingsItemIcon icon={IconSun} size={11} className="bg-os-foreground/10 text-os-foreground/60" />
-                            <span className="text-xs text-os-foreground/70">Tema</span>
-                          </div>
-                          <IconChevronRight size={12} className="text-os-foreground/25" />
-                        </button>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="tema"
-                        initial={{ opacity: 0, x: 8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 8 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setSettingsView('menu')}
-                          className="w-full flex items-center gap-1.5 px-3 py-2 border-b border-os-foreground/[0.06] hover:bg-os-foreground/[0.05] transition-colors"
-                        >
-                          <IconChevronRight size={11} className="text-os-foreground/30 rotate-180 shrink-0" />
-                          <span className="text-[9px] font-bold uppercase tracking-widest text-os-foreground/30">Tema</span>
-                        </button>
-
-                        <div className="p-2.5 space-y-3">
-                          <div>
-                            <p className="text-[9px] text-os-foreground/30 font-semibold uppercase tracking-wider mb-1.5 px-0.5">Mode</p>
-                            <div className="flex gap-1">
-                              <button
-                                type="button"
-                                onClick={() => handleTheme('light')}
-                                className={cn(
-                                  "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all",
-                                  theme === 'light' ? "bg-os-accent text-white" : "bg-os-foreground/[0.06] text-os-foreground/50 hover:bg-os-foreground/[0.10]"
-                                )}
-                              >
-                                <IconSun size={10} /> Terang
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleTheme('dark')}
-                                className={cn(
-                                  "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[10px] font-semibold transition-all",
-                                  theme === 'dark' ? "bg-os-accent text-white" : "bg-os-foreground/[0.06] text-os-foreground/50 hover:bg-os-foreground/[0.10]"
-                                )}
-                              >
-                                <IconMoon size={10} /> Gelap
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <SettingsItemIcon icon={IconDroplet} size={11} className="bg-os-foreground/10 text-os-foreground/60" />
-                              <span className="text-xs text-os-foreground/70">Transparansi</span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={onToggleTransparent}
-                              className={cn(
-                                "w-8 h-4.5 rounded-full relative transition-all duration-200",
-                                transparent ? "bg-os-accent" : "bg-os-foreground/20"
-                              )}
-                            >
-                              <span className={cn(
-                                "absolute top-0.5 size-3.5 rounded-full bg-white shadow-sm transition-all duration-200",
-                                transparent ? "left-[calc(100%-18px)]" : "left-0.5"
-                              )} />
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-
-        <Button
-          onClick={isWindow ? handleToggleSettings : undefined}
-          className={cn(
-            "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-os-foreground/60 text-xs font-medium",
-            isWindow && settingsOpen && "bg-os-foreground/[0.06] !shadow-none"
-          )}
-        >
-          <SettingsItemIcon icon={IconSettings} size={12} className="bg-os-foreground/10 text-os-foreground/60" />
-          Pengaturan
-        </Button>
-        <Button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-light text-xs font-medium">
-          <SettingsItemIcon icon={IconLogout} size={12} className="bg-red-light/10 text-red-light" />
-          Keluar
-        </Button>
+    <PerfectScrollbar className="flex-1 px-2">
+      <p className="text-[9px] font-bold uppercase tracking-widest text-os-foreground/30 px-3 pb-1.5 pt-1">Menu</p>
+      <div className="space-y-0.5">
+        {navItems.map((item) => {
+          const active = activeNav === item.key
+          return (
+            <button
+              key={item.key}
+              onClick={() => { setActiveNav(item.key); onNavSelect?.() }}
+              className={cn(
+                "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-all duration-150",
+                active
+                  ? "bg-os-accent/15 text-os-accent"
+                  : "text-os-foreground/60 hover:text-os-foreground hover:bg-os-foreground/[0.06]"
+              )}
+            >
+              <SettingsItemIcon
+                icon={item.icon} size={13}
+                className={cn("shrink-0", active ? "bg-os-accent text-white" : "bg-os-foreground/10 text-os-foreground/60")}
+              />
+              <span className="text-xs font-medium flex-1 whitespace-nowrap">{item.label}</span>
+              {item.badge && (
+                <span className="text-[9px] font-bold bg-red-light text-white rounded-full min-w-4 h-4 flex items-center justify-center px-1 shrink-0">
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
-    </>
-  )
-}
+    </PerfectScrollbar>
+
+    <div className="px-2 pb-2 pt-1.5 border-t border-os-foreground/[0.07] shrink-0">
+      <Button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-red-light text-xs font-medium">
+        <SettingsItemIcon icon={IconLogout} size={12} className="bg-red-light/10 text-red-light" />
+        Keluar
+      </Button>
+    </div>
+  </>
+)
 
 // Konten utama (dashboard body) yang sama untuk kedua mode
 const DashboardBody = () => (
@@ -494,6 +353,212 @@ const DashboardBody = () => (
   </div>
 )
 
+// ─── Settings body ────────────────────────────────────────────────────────────
+
+const SettingsBody = () => {
+  const { theme, setTheme } = useSettingStore()
+  const handleTheme = (t: 'light' | 'dark') => { applyThemeColors(t); setTheme(t) }
+
+  const notifItems = [
+    { label: "Pengingat Tugas",    sub: "Notifikasi sebelum deadline",       on: true  },
+    { label: "Update Kursus",      sub: "Pelajaran baru dari instruktur",     on: true  },
+    { label: "Pencapaian",         sub: "Badge & milestone baru",             on: true  },
+    { label: "Pesan Komunitas",    sub: "Balasan & mention di forum",         on: false },
+    { label: "Email Mingguan",     sub: "Ringkasan aktivitas belajar",        on: false },
+  ]
+
+  return (
+    <div className="max-w-6xl mx-auto px-3 py-4 sm:px-6 sm:py-6 space-y-4 sm:space-y-6">
+
+      {/* ── Profil hero card ── */}
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+        className="rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] overflow-hidden">
+        {/* Banner */}
+        <div className="h-24 bg-gradient-to-br from-os-accent/85 via-os-accent/70 to-purple-light/60 relative">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute -top-8 -right-8 size-40 rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute bottom-0 right-32 size-24 rounded-full bg-white/10 blur-2xl" />
+          </div>
+          <button className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/20 text-white text-[10px] font-semibold backdrop-blur-sm hover:bg-white/30 transition-colors">
+            <IconCamera size={11} /> Ganti Banner
+          </button>
+        </div>
+        {/* Info */}
+        <div className="px-5 pb-5">
+          <div className="flex items-end justify-between -mt-7 mb-4">
+            <div className="relative">
+              <div className="size-14 rounded-2xl bg-gradient-to-br from-os-accent to-purple-light flex items-center justify-center border-[3px] border-os-surface shadow-lg">
+                <span className="text-base font-bold text-white">SA</span>
+              </div>
+              <button className="absolute -bottom-1 -right-1 size-5 rounded-full bg-os-accent flex items-center justify-center border-2 border-os-surface">
+                <IconCamera size={9} className="text-white" />
+              </button>
+            </div>
+            <Button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-os-foreground/[0.06] border border-os-foreground/[0.08] text-os-foreground/70 hover:bg-os-foreground/10 transition-colors">
+              <IconPencil size={12} /> Edit Profil
+            </Button>
+          </div>
+          <h2 className="text-base font-bold text-os-foreground">Samsun Asyari</h2>
+          <p className="text-xs text-os-foreground/50 mt-0.5">samsunasyari@gmail.com · Student · Level 12</p>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            {[
+              { label: "Kursus Selesai", value: "12" },
+              { label: "Sertifikat",     value: "4"  },
+              { label: "Total XP",       value: "2.4k" },
+            ].map((s) => (
+              <div key={s.label} className="text-center py-2.5 px-2 rounded-xl bg-os-foreground/[0.04] border border-os-foreground/[0.06]">
+                <p className="text-base font-bold text-os-foreground">{s.value}</p>
+                <p className="text-[10px] text-os-foreground/45 mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* ── Grid setting cards ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        {/* Akun */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.35 }}
+          className="rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <SettingsItemIcon icon={IconUser} size={12} className="bg-os-accent/15 text-os-accent" />
+              <h3 className="text-sm font-bold text-os-foreground">Akun</h3>
+            </div>
+            <Button className="text-[10px] text-os-accent font-semibold px-2 py-1 rounded-lg hover:bg-os-accent/10 transition-colors">Ubah Semua</Button>
+          </div>
+          <div className="space-y-0">
+            {[
+              { label: "Nama Lengkap", value: "Samsun Asyari" },
+              { label: "Email",        value: "samsunasyari@gmail.com" },
+              { label: "Password",     value: "••••••••" },
+              { label: "Nomor HP",     value: "+62 812-xxxx-xxxx" },
+              { label: "Tanggal Lahir",value: "1 Januari 1998" },
+              { label: "Institusi",    value: "Universitas Contoh" },
+            ].map((field, i) => (
+              <div key={i} className="group flex items-center justify-between py-2.5 border-b border-os-foreground/[0.05] last:border-0">
+                <span className="text-xs text-os-foreground/50 w-28 shrink-0">{field.label}</span>
+                <span className="text-xs font-medium text-os-foreground flex-1 truncate">{field.value}</span>
+                <button className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-os-accent font-semibold ml-2 shrink-0">Ubah</button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Kolom kanan */}
+        <div className="space-y-4">
+
+          {/* Tema & Tampilan */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12, duration: 0.35 }}
+            className="rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <SettingsItemIcon icon={IconSun} size={12} className="bg-yellow-light/15 text-yellow-light" />
+              <h3 className="text-sm font-bold text-os-foreground">Tema & Tampilan</h3>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => handleTheme('light')}
+                className={cn("flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border transition-all",
+                  theme === 'light' ? "border-os-accent bg-os-accent/10" : "border-os-foreground/[0.08] hover:bg-os-foreground/[0.04]"
+                )}>
+                <div className="size-8 rounded-lg bg-white border border-os-foreground/10 flex items-center justify-center shadow-sm">
+                  <IconSun size={14} className="text-yellow-light" />
+                </div>
+                <span className={cn("text-[11px] font-semibold", theme === 'light' ? "text-os-accent" : "text-os-foreground/60")}>Terang</span>
+              </button>
+              <button onClick={() => handleTheme('dark')}
+                className={cn("flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border transition-all",
+                  theme === 'dark' ? "border-os-accent bg-os-accent/10" : "border-os-foreground/[0.08] hover:bg-os-foreground/[0.04]"
+                )}>
+                <div className="size-8 rounded-lg bg-os-black/80 flex items-center justify-center shadow-sm">
+                  <IconMoon size={14} className="text-os-foreground/70" />
+                </div>
+                <span className={cn("text-[11px] font-semibold", theme === 'dark' ? "text-os-accent" : "text-os-foreground/60")}>Gelap</span>
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Notifikasi */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16, duration: 0.35 }}
+            className="rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <SettingsItemIcon icon={IconBellRinging} size={12} className="bg-red-light/10 text-red-light" />
+              <h3 className="text-sm font-bold text-os-foreground">Notifikasi</h3>
+            </div>
+            <div className="space-y-0">
+              {notifItems.map((item, i) => (
+                <div key={i} className="flex items-center justify-between py-2.5 border-b border-os-foreground/[0.05] last:border-0">
+                  <div className="min-w-0 mr-3">
+                    <p className="text-xs font-medium text-os-foreground">{item.label}</p>
+                    <p className="text-[10px] text-os-foreground/40 mt-0.5 truncate">{item.sub}</p>
+                  </div>
+                  <div className={cn("w-8 h-[18px] rounded-full relative transition-colors duration-200 shrink-0 cursor-pointer",
+                    item.on ? "bg-os-accent" : "bg-os-foreground/20")}>
+                    <span className={cn("absolute top-0.5 size-3.5 rounded-full bg-white shadow-sm transition-all duration-200",
+                      item.on ? "left-[calc(100%-18px)]" : "left-0.5")} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Privasi & Keamanan */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.35 }}
+            className="rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <SettingsItemIcon icon={IconLock} size={12} className="bg-green-light/10 text-green-light" />
+              <h3 className="text-sm font-bold text-os-foreground">Privasi & Keamanan</h3>
+            </div>
+            <div className="space-y-0">
+              {[
+                { label: "Autentikasi Dua Faktor", sub: "Nonaktif", action: "Aktifkan", accent: true },
+                { label: "Sesi Aktif",              sub: "2 perangkat",  action: "Kelola",   accent: false },
+                { label: "Hapus Akun",              sub: "Permanen",     action: "Hapus",    accent: false, danger: true },
+              ].map((row, i) => (
+                <div key={i} className="flex items-center justify-between py-2.5 border-b border-os-foreground/[0.05] last:border-0">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-os-foreground">{row.label}</p>
+                    <p className="text-[10px] text-os-foreground/40 mt-0.5">{row.sub}</p>
+                  </div>
+                  <button className={cn("text-[10px] font-semibold px-2.5 py-1 rounded-lg transition-colors shrink-0 ml-3",
+                    row.danger ? "text-red-light hover:bg-red-light/10" :
+                    row.accent ? "text-os-accent hover:bg-os-accent/10" : "text-os-foreground/60 hover:bg-os-foreground/[0.06]"
+                  )}>{row.action}</button>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Bahasa */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24, duration: 0.35 }}
+            className="rounded-2xl bg-os-surface border border-os-foreground/[0.08] shadow-[0px_2px_8px_0px_hsl(var(--os-black)/.08)] p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <SettingsItemIcon icon={IconWorld} size={12} className="bg-blue-light/10 text-blue-light" />
+              <h3 className="text-sm font-bold text-os-foreground">Bahasa & Region</h3>
+            </div>
+            <div className="space-y-0">
+              {[
+                { label: "Bahasa Antarmuka", value: "Bahasa Indonesia" },
+                { label: "Zona Waktu",       value: "WIB (UTC+7)" },
+                { label: "Format Tanggal",   value: "DD/MM/YYYY" },
+              ].map((row, i) => (
+                <div key={i} className="group flex items-center justify-between py-2.5 border-b border-os-foreground/[0.05] last:border-0">
+                  <span className="text-xs text-os-foreground/50">{row.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-os-foreground">{row.value}</span>
+                    <IconChevronRight size={12} className="text-os-foreground/25" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
@@ -502,7 +567,6 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768)
   const [searchQuery, setSearchQuery] = useState("")
   const [headerScrolled, setHeaderScrolled] = useState(false)
-  const [transparent, setTransparent] = useState(false)
 
   useEffect(() => {
     const onResize = () => {
@@ -558,9 +622,6 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
               <SidebarNav
                 activeNav={activeNav}
                 setActiveNav={setActiveNav}
-                isWindow
-                transparent={transparent}
-                onToggleTransparent={() => setTransparent(v => !v)}
                 onNavSelect={isMobile ? () => setSidebarOpen(false) : undefined}
               />
             </motion.div>
@@ -571,7 +632,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
         <div className={cn(
           "flex flex-col min-h-full shadow-os-window-frame-content w-full overflow-hidden transition-colors duration-300",
           !isMobile && sidebarOpen ? "border-l border-l-os-foreground/10 dark:border-l-black" : "",
-          transparent ? "bg-transparent" : "bg-os-surface"
+          "bg-os-surface"
         )}>
 
           {/* Toolbar — h-14 min-h-14 + bg-os-surface-accessible + wfd, identik Notes */}
@@ -613,7 +674,7 @@ const LMSDashboard = ({ isWindow = false }: { isWindow?: boolean }) => {
 
           {/* Scroll content — identik Settings PerfectScrollbar */}
           <PerfectScrollbar onScrollY={e => setHeaderScrolled(e.scrollTop >= 10)}>
-            <DashboardBody />
+            {activeNav === 'settings' ? <SettingsBody /> : <DashboardBody />}
           </PerfectScrollbar>
 
         </div>
